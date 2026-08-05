@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import patch, MagicMock
-from src.agent import get_agent_chain
+from src.agent import get_agent_chain, run_query
 from src.config import Config
 
 def test_config_defaults():
@@ -24,3 +24,15 @@ def test_get_agent_chain(mock_get_retriever, mock_chat_openai):
     assert chain is not None
     mock_chat_openai.assert_called_once()
     mock_get_retriever.assert_called_once()
+
+@patch('src.agent.get_agent_chain')
+def test_run_query_error_handling(mock_get_agent_chain):
+    # Mock the chain to raise an exception
+    mock_chain = MagicMock()
+    mock_chain.invoke.side_effect = Exception("API Limit Reached")
+    mock_get_agent_chain.return_value = mock_chain
+    
+    answer, context = run_query("test query")
+    
+    assert "An error occurred while generating the answer: API Limit Reached" in answer
+    assert context == []
