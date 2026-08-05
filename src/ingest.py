@@ -18,14 +18,20 @@ def load_documents(data_dir: str = "data"):
     # Load PDFs
     for file in glob.glob(os.path.join(data_dir, "*.pdf")):
         print(f"Loading {file}...")
-        loader = PyPDFLoader(file)
-        documents.extend(loader.load())
+        try:
+            loader = PyPDFLoader(file)
+            documents.extend(loader.load())
+        except Exception as e:
+            print(f"Warning: Failed to load {file}. Error: {e}")
         
     # Load TXTs
     for file in glob.glob(os.path.join(data_dir, "*.txt")):
         print(f"Loading {file}...")
-        loader = TextLoader(file, encoding="utf-8")
-        documents.extend(loader.load())
+        try:
+            loader = TextLoader(file, encoding="utf-8")
+            documents.extend(loader.load())
+        except Exception as e:
+            print(f"Warning: Failed to load {file}. Error: {e}")
         
     return documents
 

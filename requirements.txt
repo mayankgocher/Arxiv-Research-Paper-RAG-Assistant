@@ -6,3 +6,5 @@ streamlit==1.33.0
 python-dotenv==1.0.1
 pypdf==4.1.0
 tiktoken==0.6.0
+rich==13.7.1
+pytest-mock==3.14.0

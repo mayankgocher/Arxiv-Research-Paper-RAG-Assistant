@@ -3,6 +3,7 @@ from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_community.vectorstores import Chroma
 from src.config import Config
 import logging
+import os
 
 # Configure logging for the multi-query retriever so we can see generated queries
 logging.basicConfig(level=logging.INFO)
@@ -10,6 +11,12 @@ logging.getLogger("langchain.retrievers.multi_query").setLevel(logging.INFO)
 
 def get_vectorstore():
     """Initializes and returns the Chroma vector store connection."""
+    if not os.path.exists(Config.CHROMA_PERSIST_DIRECTORY) or not os.listdir(Config.CHROMA_PERSIST_DIRECTORY):
+        raise FileNotFoundError(
+            f"Vector store not found or empty at {Config.CHROMA_PERSIST_DIRECTORY}. "
+            "Please run 'python src/ingest.py' to ingest documents first."
+        )
+        
     embeddings = OpenAIEmbeddings()
     vectorstore = Chroma(
         persist_directory=Config.CHROMA_PERSIST_DIRECTORY,

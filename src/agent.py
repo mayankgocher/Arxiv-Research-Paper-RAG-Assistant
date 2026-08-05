@@ -43,7 +43,10 @@ def get_agent_chain():
 
 def run_query(query: str):
     """Executes a single query against the RAG agent."""
-    rag_chain = get_agent_chain()
-    print(f"Executing query: '{query}'")
-    response = rag_chain.invoke({"input": query})
-    return response['answer'], response['context']
+    try:
+        rag_chain = get_agent_chain()
+        print(f"Executing query: '{query}'")
+        response = rag_chain.invoke({"input": query})
+        return response['answer'], response.get('context', [])
+    except Exception as e:
+        return f"An error occurred while generating the answer: {str(e)}", []
