@@ -11,3 +11,4 @@ class Config:
     CHUNK_OVERLAP = int(os.getenv("CHUNK_OVERLAP", 200))
     MODEL_NAME = os.getenv("MODEL_NAME", "gpt-3.5-turbo")
     TEMPERATURE = float(os.getenv("TEMPERATURE", 0.0))
+    RERANKER_MODEL_NAME = os.getenv("RERANKER_MODEL_NAME", "cross-encoder/ms-marco-MiniLM-L-6-v2")

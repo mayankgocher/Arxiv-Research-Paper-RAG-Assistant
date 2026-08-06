@@ -1,6 +1,9 @@
 from langchain.retrievers.multi_query import MultiQueryRetriever
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_community.vectorstores import Chroma
+from langchain.retrievers.document_compressors import CrossEncoderReranker
+from langchain_community.cross_encoders import HuggingFaceCrossEncoder
+from langchain.retrievers import ContextualCompressionRetriever
 from src.config import Config
 import logging
 import os
@@ -32,8 +35,8 @@ def get_retriever():
     """
     vectorstore = get_vectorstore()
     
-    # The base retriever
-    base_retriever = vectorstore.as_retriever(search_kwargs={"k": 4})
+    # The base retriever fetches a larger pool of candidates
+    base_retriever = vectorstore.as_retriever(search_kwargs={"k": 10})
     
     # LLM used to generate alternative queries
     llm = ChatOpenAI(
@@ -42,9 +45,19 @@ def get_retriever():
     )
     
     # Initialize MultiQueryRetriever
-    retriever = MultiQueryRetriever.from_llm(
+    multi_query_retriever = MultiQueryRetriever.from_llm(
         retriever=base_retriever, 
         llm=llm
     )
     
-    return retriever
+    # Initialize the Cross-Encoder Reranker
+    model = HuggingFaceCrossEncoder(model_name=Config.RERANKER_MODEL_NAME)
+    compressor = CrossEncoderReranker(model=model, top_n=3)
+    
+    # Wrap the MultiQueryRetriever with ContextualCompressionRetriever
+    compression_retriever = ContextualCompressionRetriever(
+        base_compressor=compressor, 
+        base_retriever=multi_query_retriever
+    )
+    
+    return compression_retriever
